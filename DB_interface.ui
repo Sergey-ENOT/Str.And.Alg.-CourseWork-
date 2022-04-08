@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>1020</width>
     <height>600</height>
    </rect>
   </property>
@@ -17,35 +17,25 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>80</y>
+      <x>30</x>
+      <y>30</y>
       <width>75</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>Print Data</string>
     </property>
    </widget>
    <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>50</y>
-      <width>481</width>
-      <height>371</height>
+      <x>0</x>
+      <y>130</y>
+      <width>1021</width>
+      <height>421</height>
      </rect>
     </property>
-    <column>
-     <property name="text">
-      <string>Age</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Name</string>
-     </property>
-    </column>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -53,7 +43,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1020</width>
      <height>21</height>
     </rect>
    </property>
