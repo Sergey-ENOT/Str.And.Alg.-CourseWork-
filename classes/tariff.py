@@ -14,6 +14,7 @@ class Tariff:
 class Tariffs:
     def __init__(self):
         self.dict_tariffs = {}
+        self.id_dict_tariff = {}
 
     def import_data(self, path):
         with open(path, 'r', newline='', encoding='utf-8') as csvfile:

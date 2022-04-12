@@ -24,7 +24,7 @@ class Client:
 class Clients:
     def __init__(self):
         self.dict_clients = {}
-        self.id_list = []
+        self.id_list_pos = []
 
     def import_data(self, path):
         with open(path, 'r', newline='', encoding='utf-8') as csvfile:
@@ -35,7 +35,7 @@ class Clients:
                               row['patronymic'],
                               int(row['current_balance']),
                               row['address'],
-                              datetime.datetime.strptime(row['date'], "%d.%m.%Y").date(),
+                              row['date'],
                               row['ID_tariff'],
                               row['active'])
                 self.dict_clients[row['ID']] = data
@@ -56,7 +56,7 @@ class Clients:
                 data.append(self.dict_clients[elem].patronymic)
                 data.append(str(self.dict_clients[elem].current_balance))
                 data.append(self.dict_clients[elem].address)
-                data.append(self.dict_clients[elem].date.strftime("%d.%m.%Y"))
+                data.append(self.dict_clients[elem].date)
                 data.append(self.dict_clients[elem].ID_tariff)
                 data.append(self.dict_clients[elem].active)
 
