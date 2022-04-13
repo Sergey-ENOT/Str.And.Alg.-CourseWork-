@@ -1,5 +1,5 @@
 import csv
-import datetime
+from datetime import datetime
 
 
 class Client:
@@ -9,7 +9,7 @@ class Client:
         self.patronymic = patronymic
         self.current_balance = current_balance
         self.address = address
-        self.date = date
+        self.date = datetime.strptime(date, "%d.%m.%Y").date()
         self.ID_tariff = ID_tariff
         self.active = active
 
@@ -56,7 +56,7 @@ class Clients:
                 data.append(self.dict_clients[elem].patronymic)
                 data.append(str(self.dict_clients[elem].current_balance))
                 data.append(self.dict_clients[elem].address)
-                data.append(self.dict_clients[elem].date)
+                data.append(self.dict_clients[elem].date.strftime("%d.%m.%Y"))
                 data.append(self.dict_clients[elem].ID_tariff)
                 data.append(self.dict_clients[elem].active)
 
