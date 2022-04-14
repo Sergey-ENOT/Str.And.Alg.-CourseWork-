@@ -15,7 +15,7 @@ MainWindow.show()
 
 status_edit = "not allow"
 list_taken_id = []
-second_write = False
+second_write = False             # variable for control items in comboBox
 
 message = QMessageBox()
 
@@ -121,15 +121,19 @@ def check_values(**kwargs):
     return "success"
 
 
-def add_data():
+def no_permission():
+    message.setIcon(QMessageBox.Warning)
+    message.setWindowTitle("Предупреждение")
+    message.setText("Нет разрешения на редактирование\nИзмените статус редактирования таблицы")
+    message.exec_()
+
+
+def add_client():
     global status_edit
     global list_taken_id
     global second_write
     if status_edit == "not allow":
-        message.setIcon(QMessageBox.Warning)
-        message.setWindowTitle("Предупреждение")
-        message.setText("Нет разрешения на редактирование\nИзмените статус редактирования таблицы")
-        message.exec_()
+        no_permission()
     else:
         second_write = True
         new_id = ""
@@ -186,10 +190,34 @@ def add_data():
             message.exec_()
 
 
+def delete_client():
+    global status_edit
+    global list_taken_id
+    global second_write
+    if status_edit == "not allow":
+        no_permission()
+    else:
+        current_row = ui.tableWidget.currentRow()
+        if current_row == -1:
+            message.setIcon(QMessageBox.Warning)
+            message.setWindowTitle("Предупреждение")
+            message.setText("Не выбрана строка для удаления")
+            message.exec_()
+        else:
+            del dc.dict_clients[dc.id_list_pos[current_row]]
+            dc.export_data("csv_files/Clients.csv")
+            dc.dict_clients = {}
+            dc.id_list_pos = []
+            list_taken_id = []
+            dt.id_dict_tariff = {}
+            dc.import_data("csv_files/Clients.csv")
+            show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff)
+
+
 show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff)
 ui.pushButton.clicked.connect(print_data)
 ui.pushButtonEdit.clicked.connect(allow_edit_table)
-ui.pushButtonAdd.clicked.connect(add_data)
-ui.pushButtonDelete.clicked.connect(check_values)
+ui.pushButtonAdd.clicked.connect(add_client)
+ui.pushButtonDelete.clicked.connect(delete_client)
 
 sys.exit(app.exec_())
