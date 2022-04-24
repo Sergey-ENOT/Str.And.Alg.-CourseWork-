@@ -13,12 +13,16 @@ class Client:
         self.ID_tariff = ID_tariff
         self.active = active
 
-    def plus(self, summ):
-        self.current_balance += summ
+    def top_up_balance(self, amount):
+        self.current_balance += amount
+        if self.active == "0":
+            self.write_off_balance(amount)
 
-    def minus(self, summ):
-        if self.current_balance >= summ:
-            self.current_balance -= summ
+    def write_off_balance(self, amount):
+        if self.current_balance >= amount:
+            self.current_balance -= amount
+            if self.active == "0":
+                self.active = "1"
 
 
 class Clients:

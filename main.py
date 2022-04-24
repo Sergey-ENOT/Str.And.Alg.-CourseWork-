@@ -7,11 +7,16 @@ import sys
 from datetime import datetime
 import traceback
 
+
 app = QtWidgets.QApplication(sys.argv)
 MainWindow = QtWidgets.QMainWindow()
 ui = Ui_MainWindow()  # pyuic5.exe -x ..\..\DB_interface.ui -o ..\..\DB_interface.py
 ui.setupUi(MainWindow)
 MainWindow.show()
+
+ui.tableWidget.setColumnWidth(3, 125)
+ui.tableWidget.setColumnWidth(4, 300)
+ui.tableWidget.setColumnWidth(7, 80)
 
 status_edit = "not allow"
 list_taken_id = []
@@ -26,7 +31,7 @@ dt = Tariffs()
 dt.import_data("csv_files/Tariffs.csv")
 
 
-def log_uncaught_exceptions(ex_cls, ex, tb): # error catcher
+def log_uncaught_exceptions(ex_cls, ex, tb):  # error catcher
     text = '{}: {}:\n'.format(ex_cls.__name__, ex)
     text += ''.join(traceback.format_tb(tb))
     print(text)
@@ -36,12 +41,22 @@ def log_uncaught_exceptions(ex_cls, ex, tb): # error catcher
 
 sys.excepthook = log_uncaught_exceptions
 
+ui.pushButtonUseFilter.setText("Применить\nфильтры")
 
-def show_table_data(dict_data, dict_t, dict_index):
+
+def delete_rows(iterator):
+    for i in range(iterator):
+        ui.tableWidget.removeRow(i)
+
+
+def show_table_data(dict_data, dict_t, dict_index, clear_status):
     global list_taken_id
+    if clear_status:
+        while ui.tableWidget.rowCount() > 0:
+            delete_rows(ui.tableWidget.rowCount())
+        list_taken_id = []
     ui.tableWidget.setRowCount(len(dict_data))
-    ui.tableWidget.setColumnWidth(3, 125)
-    ui.tableWidget.setColumnWidth(4, 250)
+    dc.id_list_pos = []
     row = 0
     for key in dict_data:
         dc.id_list_pos.append(key)
@@ -60,10 +75,40 @@ def show_table_data(dict_data, dict_t, dict_index):
     if not second_write:
         for key in dict_t.keys():
             ui.comboBoxTariff.addItem(str(dict_t[key].name))
+            ui.comboBoxFilterTariff.addItem(str(dict_t[key].name))
         ui.comboBoxActive.addItem("1")
         ui.comboBoxActive.addItem("0")
     for key in dict_t:
         dict_index[dict_t[key].name] = key
+
+
+def show_filtered_table_data():
+    global second_write
+    second_write = True
+    dict_data = dc.dict_clients
+    dict_t = dt.dict_tariffs
+    dict_index = dt.id_dict_tariff
+    tariff_filter = ui.comboBoxFilterTariff.currentText()
+    active_filter = ui.comboBoxFilterActive.currentText()
+    dict_new_data = {}
+    if tariff_filter == "Не выбрано" and active_filter == "Не выбрано":
+        show_table_data(dict_data=dict_data, dict_t=dict_t, dict_index=dict_index, clear_status=True)
+        return
+    elif tariff_filter != "Не выбрано" and active_filter == "Не выбрано":
+        for key in dict_data.keys():
+            if dict_t[dict_data[key].ID_tariff].name == tariff_filter:
+                dict_new_data[key] = dict_data[key]
+    elif tariff_filter == "Не выбрано" and active_filter != "Не выбрано":
+        active_value = "0" if active_filter == "Неактивные" else "1"
+        for key in dict_data.keys():
+            if dict_data[key].active == active_value:
+                dict_new_data[key] = dict_data[key]
+    elif tariff_filter != "Не выбрано" and active_filter != "Не выбрано":
+        active_value = "0" if active_filter == "Неактивные" else "1"
+        for key in dict_data.keys():
+            if dict_data[key].active == active_value and dict_t[dict_data[key].ID_tariff].name == tariff_filter:
+                dict_new_data[key] = dict_data[key]
+    show_table_data(dict_data=dict_new_data, dict_t=dict_t, dict_index=dict_index, clear_status=True)
 
 
 def print_data():
@@ -106,11 +151,11 @@ def if_has_int(value, len_value):
 
 
 def check_values(**kwargs):
-    list_str = ["Фамилия", "Имя", "Отчество"]
-    for value in list_str:
+    list_str = ["Фамилия", "Имя", "Отчество"]    # список текстовых полей
+    for value in list_str:                       # проверка на пустоту или содержание числа
         if (not kwargs[value].strip()) or (if_has_int(kwargs[value], len(kwargs[value]))):
             return value
-    if (not kwargs["Баланс"].strip()) or (not kwargs["Баланс"].isdigit()):
+    if (not kwargs["Баланс"].strip()) or (not kwargs["Баланс"].isdigit()):    # проверка на пустоту или наличие буквы
         return "Баланс"
     if not kwargs["Адрес"].strip():
         return "Адрес"
@@ -165,7 +210,8 @@ def add_client():
             list_taken_id = []
             dt.id_dict_tariff = {}
             dc.import_data("csv_files/Clients.csv")
-            show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff)
+            show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs,
+                            dict_index=dt.id_dict_tariff, clear_status=False)
         else:
             message.setIcon(QMessageBox.Critical)
             message.setWindowTitle("Ошибка")
@@ -190,6 +236,10 @@ def add_client():
             message.exec_()
 
 
+def edit_client():
+    pass
+
+
 def delete_client():
     global status_edit
     global list_taken_id
@@ -211,13 +261,28 @@ def delete_client():
             list_taken_id = []
             dt.id_dict_tariff = {}
             dc.import_data("csv_files/Clients.csv")
-            show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff)
+            show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs,
+                            dict_index=dt.id_dict_tariff, clear_status=False)
 
 
-show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff)
+show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff, clear_status=False)
 ui.pushButton.clicked.connect(print_data)
 ui.pushButtonEdit.clicked.connect(allow_edit_table)
-ui.pushButtonAdd.clicked.connect(add_client)
-ui.pushButtonDelete.clicked.connect(delete_client)
+ui.pushButtonAddClient.clicked.connect(add_client)
+ui.pushButtonEditClient.clicked.connect(edit_client)
+ui.pushButtonDeleteClient.clicked.connect(delete_client)
+ui.pushButtonUseFilter.clicked.connect(show_filtered_table_data)
+ds = Services()
+ds.import_data("csv_files/Services.csv")
+# for key in ds.dict_services.keys():
+#     print(key, ds.dict_services[key].content, ds.dict_services[key].price)
+#
+# for key in dt.dict_tariffs.keys():
+#     dt.dict_tariffs[key].get_price(ds.dict_services)
+# print("|--------------------------|")
+#
+# for key in dt.dict_tariffs.keys():
+#     current_obj = dt.dict_tariffs[key]
+#     print(key, current_obj.name, current_obj.services, current_obj.price)
 
 sys.exit(app.exec_())

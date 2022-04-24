@@ -7,6 +7,10 @@ class Tariff:
         self.services = services
         self.price = 0
 
+    def get_price(self, dict_services):
+        for value in self.services:
+            self.price += dict_services[value].price
+
     def __str__(self):
         return self.name + " " + " ".join(self.services) + " " + str(self.price)
 
