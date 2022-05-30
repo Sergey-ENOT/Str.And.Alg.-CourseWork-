@@ -29,6 +29,7 @@ class Clients:
     def __init__(self):
         self.dict_clients = {}
         self.id_list_pos = []
+        self.current_abonent_id = 0
 
     def import_data(self, path):
         with open(path, 'r', newline='', encoding='utf-8') as csvfile:

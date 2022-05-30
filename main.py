@@ -16,11 +16,18 @@ MainWindow.show()
 
 ui.tableWidget.setColumnWidth(3, 125)
 ui.tableWidget.setColumnWidth(4, 300)
-ui.tableWidget.setColumnWidth(7, 80)
+ui.tableWidget.setColumnWidth(7, 70)
+ui.tableWidgetTariff.setColumnWidth(1, 400)
+ui.tableWidgetService.setColumnWidth(0, 200)
+ui.tableWidgetService.setColumnWidth(1, 125)
+ui.pushButtonChooseClient.setText("Выбрать\nзапись")
+ui.pushButtonApplyClient.setText("Подтвердить\nизменение")
+ui.pushButtonUseFilter.setText("Применить\nфильтры")
+ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger(0))
 
 status_edit = "not allow"
 list_taken_id = []
-second_write = False             # variable for control items in comboBox
+status_client_edit = False
 
 message = QMessageBox()
 
@@ -40,8 +47,6 @@ def log_uncaught_exceptions(ex_cls, ex, tb):  # error catcher
 
 
 sys.excepthook = log_uncaught_exceptions
-
-ui.pushButtonUseFilter.setText("Применить\nфильтры")
 
 
 def delete_rows(iterator):
@@ -72,19 +77,13 @@ def show_table_data(dict_data, dict_t, dict_index, clear_status):
         ui.tableWidget.setItem(row, 7, QtWidgets.QTableWidgetItem(dict_data[key].active))
         list_taken_id.append(key)
         row += 1
-    if not second_write:
-        for key in dict_t.keys():
-            ui.comboBoxTariff.addItem(str(dict_t[key].name))
-            ui.comboBoxFilterTariff.addItem(str(dict_t[key].name))
-        ui.comboBoxActive.addItem("1")
-        ui.comboBoxActive.addItem("0")
     for key in dict_t:
         dict_index[dict_t[key].name] = key
 
 
 def show_filtered_table_data():
-    global second_write
-    second_write = True
+    global status_client_edit
+    status_client_edit = False
     dict_data = dc.dict_clients
     dict_t = dt.dict_tariffs
     dict_index = dt.id_dict_tariff
@@ -111,30 +110,17 @@ def show_filtered_table_data():
     show_table_data(dict_data=dict_new_data, dict_t=dict_t, dict_index=dict_index, clear_status=True)
 
 
-def print_data():
-    current_row = ui.tableWidget.currentRow()
-    if current_row == -1:
-        pass
-    else:
-        obj_class = dc.dict_clients[dc.id_list_pos[current_row]]
-        ui.lineEditSurname.setText(obj_class.surname)
-        ui.lineEditName.setText(obj_class.name)
-        ui.lineEditPatronymic.setText(obj_class.patronymic)
-        ui.lineEditCurrentB.setText(str(obj_class.current_balance))
-        ui.lineEditAddress.setText(obj_class.address)
-        ui.lineEditDate.setText(obj_class.date.strftime("%d.%m.%Y"))
-        ui.comboBoxTariff.setCurrentText(dt.dict_tariffs[obj_class.ID_tariff].name)
-        ui.comboBoxActive.setCurrentText(obj_class.active)
-
-
 def allow_edit_table():
     global status_edit
     if status_edit == "not allow":
-        ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger(2))
+        # ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger(2))
         ui.valueStatusEdit.setText("Разрешено")
         status_edit = "allow"
     elif status_edit == "allow":
-        ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger(0))
+        global status_client_edit
+        status_client_edit = False
+        ui.labelStatusV.setText("Запись не выбрана")
+        # ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger(0))
         ui.valueStatusEdit.setText("Запрещено")
         status_edit = "not allow"
 
@@ -155,8 +141,8 @@ def check_values(**kwargs):
     for value in list_str:                       # проверка на пустоту или содержание числа
         if (not kwargs[value].strip()) or (if_has_int(kwargs[value], len(kwargs[value]))):
             return value
-    if (not kwargs["Баланс"].strip()) or (not kwargs["Баланс"].isdigit()):    # проверка на пустоту или наличие буквы
-        return "Баланс"
+    if (not kwargs["Баланс"].strip()) or (not kwargs["Баланс"].isdigit()):    # проверка на пустоту или
+        return "Баланс"                                                       # наличие буквы
     if not kwargs["Адрес"].strip():
         return "Адрес"
     try:
@@ -176,12 +162,13 @@ def no_permission():
 def add_client():
     global status_edit
     global list_taken_id
-    global second_write
+    global status_client_edit
+    status_client_edit = False
+    ui.labelStatusV.setText("Запись не выбрана")
     if status_edit == "not allow":
         no_permission()
     else:
-        second_write = True
-        new_id = ""
+        new_id = 0
         g_surname = ui.lineEditSurname.text()
         g_name = ui.lineEditName.text()
         g_patronymic = ui.lineEditPatronymic.text()
@@ -195,13 +182,14 @@ def add_client():
                               Адрес=g_address, Дата=g_date)
         if result == "success":
             set_taken_id = set(list_taken_id)
+            list_max = max([int(x) for x in list_taken_id])
             for i in range(len(list_taken_id)):
                 count = i + 1
                 if str(count) not in set_taken_id:
                     new_id = count
                     break
                 elif i == (len(list_taken_id) - 1):
-                    new_id = int(list_taken_id[i]) + 1
+                    new_id = list_max + 1
             dc.dict_clients[new_id] = Client(g_surname, g_name, g_patronymic, g_current_b, g_address,
                                              g_date, g_tariff_id, g_active)
             dc.export_data("csv_files/Clients.csv")
@@ -236,14 +224,92 @@ def add_client():
             message.exec_()
 
 
+def choose_client():
+    global status_client_edit
+    status_client_edit = True
+    current_row = ui.tableWidget.currentRow()
+    if current_row != -1:
+        dc.current_abonent_id = list_taken_id[ui.tableWidget.currentRow()]
+        obj_class = dc.dict_clients[dc.id_list_pos[current_row]]
+        ui.lineEditSurname.setText(obj_class.surname)
+        ui.lineEditName.setText(obj_class.name)
+        ui.lineEditPatronymic.setText(obj_class.patronymic)
+        ui.lineEditCurrentB.setText(str(obj_class.current_balance))
+        ui.lineEditAddress.setText(obj_class.address)
+        ui.lineEditDate.setText(obj_class.date.strftime("%d.%m.%Y"))
+        ui.comboBoxTariff.setCurrentText(dt.dict_tariffs[obj_class.ID_tariff].name)
+        ui.comboBoxActive.setCurrentText(obj_class.active)
+        ui.labelStatusV.setText("Запись выбрана")
+
+
 def edit_client():
-    pass
+    global list_taken_id
+    if status_edit == "not allow":
+        no_permission()
+    else:
+        if status_client_edit and (dc.current_abonent_id == list_taken_id[ui.tableWidget.currentRow()]):
+            g_surname = ui.lineEditSurname.text()
+            g_name = ui.lineEditName.text()
+            g_patronymic = ui.lineEditPatronymic.text()
+            g_current_b = ui.lineEditCurrentB.text()
+            g_address = ui.lineEditAddress.text()
+            g_date = ui.lineEditDate.text()
+            result = check_values(Фамилия=g_surname, Имя=g_name, Отчество=g_patronymic, Баланс=g_current_b,
+                                  Адрес=g_address, Дата=g_date)
+            if result == "success":
+                current_abonent = dc.dict_clients[dc.current_abonent_id]
+                current_abonent.surname = ui.lineEditSurname.text()
+                current_abonent.name = ui.lineEditName.text()
+                current_abonent.patronymic = ui.lineEditPatronymic.text()
+                current_abonent.current_balance = ui.lineEditCurrentB.text()
+                current_abonent.address = ui.lineEditAddress.text()
+                current_abonent.date = datetime.strptime(ui.lineEditDate.text(), "%d.%m.%Y").date()
+                current_abonent.ID_tariff = dt.id_dict_tariff[ui.comboBoxTariff.currentText()]
+                current_abonent.active = ui.comboBoxActive.currentText()
+                dc.export_data("csv_files/Clients.csv")
+                dc.dict_clients = {}
+                dc.id_list_pos = []
+                list_taken_id = []
+                dt.id_dict_tariff = {}
+                dc.import_data("csv_files/Clients.csv")
+                show_filtered_table_data()
+            else:
+                message.setIcon(QMessageBox.Critical)
+                message.setWindowTitle("Ошибка")
+                message.setText(f"Ошибка при заполнении поля: {result}")
+                if result == "Фамилия" or result == "Имя" or result == "Отчество":
+                    message.setDetailedText("Варианты возникновения ошибки:\n1. Поле пустое\n"
+                                            "2. Поле пустое и в нём присутствуют пробелы\n" +
+                                            "3. Поле заполнено, но в строке присутствуют цифры")
+                elif result == "Баланс":
+                    message.setDetailedText("Варианты возникновения ошибки:\n1. Поле пустое\n"
+                                            "2. Поле пустое и в нём присутствуют пробелы\n" +
+                                            "3. Поле заполнено, но в строке присутствуют буквы\n" +
+                                            "4. Поле заполнено, но число отрицательное\n")
+                elif result == "Адрес":
+                    message.setDetailedText("Варианты возникновения ошибки:\n1. Поле пустое\n"
+                                            "2. Поле пустое и в нём присутствуют пробелы")
+                elif result == "Дата":
+                    message.setDetailedText("Варианты возникновения ошибки:\n1. Поле пустое\n"
+                                            "2. Поле пустое и в нём присутствуют пробелы\n" +
+                                            "3. Некорректно введена дата\n" +
+                                            "Формат: день.месяц.год")
+                message.exec_()
+            ui.labelStatusV.setText("Запись изменена")
+        else:
+            message.setIcon(QMessageBox.Critical)
+            message.setWindowTitle("Ошибка")
+            message.setText("Не выбрана запись для редактирования")
+            message.setDetailedText("Выбранная для редактирования строка не совпадает с текущей выделенной")
+            message.exec_()
 
 
 def delete_client():
     global status_edit
     global list_taken_id
-    global second_write
+    global status_client_edit
+    status_client_edit = False
+    ui.labelStatusV.setText("Запись не выбрана")
     if status_edit == "not allow":
         no_permission()
     else:
@@ -265,24 +331,83 @@ def delete_client():
                             dict_index=dt.id_dict_tariff, clear_status=False)
 
 
-show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff, clear_status=False)
-ui.pushButton.clicked.connect(print_data)
+def install_date_today():
+    ui.lineEditDate.setText(datetime.now().strftime("%d.%m.%Y"))
+
+
+def update_box_tariff(dict_t):
+    for key in dict_t.keys():
+        ui.comboBoxTariff.addItem(str(dict_t[key].name))
+        ui.comboBoxFilterTariff.addItem(str(dict_t[key].name))
+
+
+def update_box_active():
+    ui.comboBoxActive.addItem("1")
+    ui.comboBoxActive.addItem("0")
+
+
+update_box_tariff(dt.dict_tariffs)
+update_box_active()
+show_table_data(dict_data=dc.dict_clients, dict_t=dt.dict_tariffs, dict_index=dt.id_dict_tariff,
+                clear_status=False)
+
 ui.pushButtonEdit.clicked.connect(allow_edit_table)
 ui.pushButtonAddClient.clicked.connect(add_client)
-ui.pushButtonEditClient.clicked.connect(edit_client)
+ui.pushButtonChooseClient.clicked.connect(choose_client)
+ui.pushButtonApplyClient.clicked.connect(edit_client)
 ui.pushButtonDeleteClient.clicked.connect(delete_client)
 ui.pushButtonUseFilter.clicked.connect(show_filtered_table_data)
+ui.pushButtonDateToday.clicked.connect(install_date_today)
+
 ds = Services()
 ds.import_data("csv_files/Services.csv")
-# for key in ds.dict_services.keys():
-#     print(key, ds.dict_services[key].content, ds.dict_services[key].price)
-#
-# for key in dt.dict_tariffs.keys():
-#     dt.dict_tariffs[key].get_price(ds.dict_services)
-# print("|--------------------------|")
-#
-# for key in dt.dict_tariffs.keys():
-#     current_obj = dt.dict_tariffs[key]
-#     print(key, current_obj.name, current_obj.services, current_obj.price)
+
+
+def show_table_tariffs(dict_data, dict_services):
+    ui.tableWidgetTariff.setRowCount(len(dict_data))
+    str_services = ""
+    row = 0
+    for key in dict_data:
+        ui.tableWidgetTariff.setItem(row, 0, QtWidgets.QTableWidgetItem(dict_data[key].name))
+        for value in dict_data[key].services:
+            str_services += dict_services[value].content + " , "
+        ui.tableWidgetTariff.setItem(row, 1, QtWidgets.QTableWidgetItem(str_services))
+        dict_data[key].get_price(dict_services)
+        ui.tableWidgetTariff.setItem(row, 2, QtWidgets.QTableWidgetItem(str(dict_data[key].price)))
+        str_services = ""
+        row += 1
+
+
+def show_table_services(dict_data):
+    ui.tableWidgetService.setRowCount(len(dict_data))
+    row = 0
+    for key in dict_data:
+        dc.id_list_pos.append(key)
+        ui.tableWidgetService.setItem(row, 0, QtWidgets.QTableWidgetItem(dict_data[key].content))
+        ui.tableWidgetService.setItem(row, 1, QtWidgets.QTableWidgetItem(str(dict_data[key].price)))
+        row += 1
+
+
+def accounting_payments():
+    # date_user = datetime.strptime("2022.05.31", "%Y.%m.%d")
+    # print(date_user)
+    print("Абоненты, у которых близко срок оплаты тарифа:")
+    counter = 1
+    for value in dc.dict_clients.keys():
+        timedelta = (dc.dict_clients[value].date - datetime.today().date()).days
+        if timedelta == 0:
+            print(str(counter) + ".", end=" ")
+            print(dc.dict_clients[value].surname, dc.dict_clients[value].name, "(сегодня производится списание)")
+            counter += 1
+        if 0 < timedelta <= 2:
+            print(str(counter) + ".", end=" ")
+            print(dc.dict_clients[value].surname, dc.dict_clients[value].name)
+            counter += 1
+
+
+ui.pushButtonCheckPayments.clicked.connect(accounting_payments)
+
+show_table_tariffs(dt.dict_tariffs, ds.dict_services)
+show_table_services(ds.dict_services)
 
 sys.exit(app.exec_())

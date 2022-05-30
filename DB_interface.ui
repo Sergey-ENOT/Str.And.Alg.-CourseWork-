@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>База компании CWW</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -31,7 +34,7 @@
     </property>
     <widget class="QWidget" name="tabClient">
      <attribute name="title">
-      <string>База клиентов</string>
+      <string>Таблица абонентов</string>
      </attribute>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
@@ -109,19 +112,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QPushButton" name="pushButton">
-      <property name="geometry">
-       <rect>
-        <x>940</x>
-        <y>130</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Print Data</string>
-      </property>
-     </widget>
      <widget class="QTableWidget" name="tableWidget">
       <property name="enabled">
        <bool>true</bool>
@@ -154,6 +144,9 @@
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::EditKeyPressed</set>
@@ -210,8 +203,8 @@
        <rect>
         <x>900</x>
         <y>430</y>
-        <width>126</width>
-        <height>134</height>
+        <width>143</width>
+        <height>276</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -229,24 +222,11 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>40</height>
+           <height>64</height>
           </size>
          </property>
          <property name="text">
           <string>Добавить запись</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButtonEditClient">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Редактировать запись</string>
          </property>
         </widget>
        </item>
@@ -264,11 +244,37 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>40</height>
+           <height>64</height>
           </size>
          </property>
          <property name="text">
           <string>Удалить запись</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonDateToday">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>64</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Дата сегодня</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonCheckPayments">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>64</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Проверить платежи</string>
          </property>
         </widget>
        </item>
@@ -280,7 +286,7 @@
         <x>10</x>
         <y>430</y>
         <width>501</width>
-        <height>289</height>
+        <height>251</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout">
@@ -589,7 +595,7 @@
         <x>10</x>
         <y>90</y>
         <width>291</width>
-        <height>51</height>
+        <height>55</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
@@ -673,65 +679,182 @@
        <bool>false</bool>
       </property>
      </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>650</x>
+        <y>430</y>
+        <width>241</width>
+        <height>110</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QLabel" name="labelEditClient">
+         <property name="text">
+          <string>Редактировать запись</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="pushButtonChooseClient">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Выб.зап.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonApplyClient">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>60</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Прим.Изм.</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelStatusV">
+         <property name="text">
+          <string>Запись не выбрана</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabTariff">
      <attribute name="title">
-      <string>База тарифов</string>
+      <string>Таблица тарифов</string>
      </attribute>
-     <widget class="QLabel" name="label_3">
+     <widget class="QTableWidget" name="tableWidgetTariff">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
-        <x>140</x>
-        <y>160</y>
-        <width>47</width>
-        <height>13</height>
+        <x>0</x>
+        <y>170</y>
+        <width>1041</width>
+        <height>341</height>
        </rect>
       </property>
-      <property name="text">
-       <string>TextLabel</string>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_2">
-      <property name="geometry">
-       <rect>
-        <x>270</x>
-        <y>120</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
       </property>
-      <property name="text">
-       <string>PushButton</string>
+      <property name="maximumSize">
+       <size>
+        <width>1677777</width>
+        <height>16777215</height>
+       </size>
       </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::EditKeyPressed</set>
+      </property>
+      <property name="dragDropOverwriteMode">
+       <bool>true</bool>
+      </property>
+      <attribute name="horizontalHeaderCascadingSectionResizes">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>150</number>
+      </attribute>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Название тарифа</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Входящие услуги</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Цена тарифа</string>
+       </property>
+      </column>
      </widget>
     </widget>
     <widget class="QWidget" name="tabService">
      <attribute name="title">
-      <string>База услуг</string>
+      <string>Таблица услуг</string>
      </attribute>
-    </widget>
-    <widget class="QWidget" name="tabImage">
-     <attribute name="title">
-      <string>Изображение</string>
-     </attribute>
-     <widget class="QLabel" name="labelImage">
+     <widget class="QTableWidget" name="tableWidgetService">
       <property name="geometry">
        <rect>
-        <x>6</x>
-        <y>2</y>
-        <width>1021</width>
-        <height>561</height>
+        <x>0</x>
+        <y>170</y>
+        <width>1041</width>
+        <height>341</height>
        </rect>
       </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="pixmap">
-       <pixmap>739010.png</pixmap>
-      </property>
-      <property name="scaledContents">
-       <bool>true</bool>
-      </property>
+      <column>
+       <property name="text">
+        <string>Название</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Цена</string>
+       </property>
+      </column>
      </widget>
     </widget>
    </widget>
