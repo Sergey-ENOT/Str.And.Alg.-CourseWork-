@@ -28,6 +28,7 @@ ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger(0))
 status_edit = "not allow"
 list_taken_id = []
 status_client_edit = False
+status_list_widget = False
 
 message = QMessageBox()
 
@@ -389,20 +390,30 @@ def show_table_services(dict_data):
 
 
 def accounting_payments():
-    # date_user = datetime.strptime("2022.05.31", "%Y.%m.%d")
-    # print(date_user)
-    print("Абоненты, у которых близко срок оплаты тарифа:")
-    counter = 1
+    global status_list_widget
+    if not status_list_widget:
+        status_list_widget = True
+    else:
+        ui.listWidget0Days.clear()
+        ui.listWidget1_2Days.clear()
+        ui.listWidget3MoreDays.clear()
+        ui.listWidgetOverdue.clear()
+    ui.labelDateT.setText("Дата сегодня: " + datetime.now().strftime("%d.%m.%Y"))
     for value in dc.dict_clients.keys():
         timedelta = (dc.dict_clients[value].date - datetime.today().date()).days
-        if timedelta == 0:
-            print(str(counter) + ".", end=" ")
-            print(dc.dict_clients[value].surname, dc.dict_clients[value].name, "(сегодня производится списание)")
-            counter += 1
-        if 0 < timedelta <= 2:
-            print(str(counter) + ".", end=" ")
-            print(dc.dict_clients[value].surname, dc.dict_clients[value].name)
-            counter += 1
+        cur_client = dc.dict_clients[value]
+        if timedelta >= 0:
+            if timedelta == 0:
+                ui.listWidget0Days.addItem(cur_client.surname + " " + cur_client.name + " " + cur_client.patronymic)
+            elif 0 < timedelta <= 2:
+                ui.listWidget1_2Days.addItem(cur_client.surname + " " + cur_client.name + " " + cur_client.patronymic +
+                                             " - " + datetime.strftime(cur_client.date, "%d.%m.%Y"))
+            else:
+                ui.listWidget3MoreDays.addItem(cur_client.surname + " " + cur_client.name + " " + cur_client.patronymic
+                                               + " - " + datetime.strftime(cur_client.date, "%d.%m.%Y"))
+        else:
+            ui.listWidgetOverdue.addItem(cur_client.surname + " " + cur_client.name + " " + cur_client.patronymic +
+                                         " - " + datetime.strftime(cur_client.date, "%d.%m.%Y"))
 
 
 ui.pushButtonCheckPayments.clicked.connect(accounting_payments)
